@@ -1,0 +1,10 @@
+requests
+beautifulsoup4
+pandas
+transformers
+datasets
+numpy
+torch
+accelerate
+seqeval
+click
