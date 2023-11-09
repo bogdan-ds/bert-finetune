@@ -1,4 +1,4 @@
-# Solution Name
+# Exadel Podix ML task
 
 ## Table of Contents
 1. [Framing the Problem](#framing-the-problem)
@@ -39,20 +39,21 @@ The model is fine-tuned on this dataset and then used to extract the product nam
 <a name="dataset-generation"></a>
 The first step of the solution is to create a train and test dataset. For this reason I created a scraper, which handles the following cases:
 - The URL produces a 404 error or the content is empty.
-- Leverages the BeatifulSoup library to extract the text from the HTML and strip any unnecessary tags.
+- Leverages the BeautifulSoup library to extract the text from the HTML and strip any unnecessary tags.
 - Saves the sanitized text to a file.
 
 The next step is to split the text into tokens and set a default label for all tokens. This is the input expected by BERT.
-This is then saved following a 80/20 split and ready for manual annotation. 
+This is then saved following an 80/20 split and ready for manual annotation. 
 
 Since we only have one class, the annotation is done by marking the product names with the `B-PRODUCT` and `I-PRODUCT` labels.
-I've included a sample of how the dataset looks like after annotation. The dataset I used for fine-tuning consists of 57 files for the train dataset and 12 for the test.
+
+I've included a **sample** of how the dataset looks like after annotation. The dataset I used for fine-tuning consists of 57 files for the train dataset and 12 for the test.
 
 
 ### Model Fine-Tuning
 <a name="model-fine-tuning"></a>
 Fine-tuning the BERT model was done within the Huggingface framework. The model has a context window of 512 tokens. This is sometimes not enough for some web pages.
-However after annotating the dataset, I found that the product names are usually within the first 512 tokens. I've described a potential improvement in the section below, where tokens are split so the full page can be processed.
+However, after annotating the dataset, I found that the product names are usually within the first 512 tokens. I've described a potential improvement in the section below, where tokens are split so the full page can be processed.
 
 The model was fine-tuned for 50 epochs with a batch size of 4. 
 
@@ -64,11 +65,24 @@ The metrics chosen are precision, recall, F1 score and accuracy. Below is a brie
 - F1 score: The harmonic mean of precision and recall.
 - Accuracy: The number of correctly predicted product names divided by the total number of tokens.
 
+Below are the diagrams of the evaluation metrics for the test dataset.
+
+![Precision](images/precision.png)
+![Recall](images/recall.png)
+![F1](images/f1.png)
+![Accuracy](images/accuracy.png)
+
+
 ### Pipeline
 <a name="pipeline"></a>
+For inferencing from a URL, I've created a pipeline which scrapes the web page, tokenizes it with truncation and converts the predictions to readable product names.
+The pipeline is usable via the command line and is described in the usage section below.
 
 ## Potential Improvements
 <a name="potential-improvements"></a>
+The most significant one would be to create a larger dataset. Due to time constraints the one I created was very limited, yet the model still performed reasonably well.
+Another improvement is to tokenize the whole text and split it into chunks of 512 tokens. The way to do this is to use the tokenizer without truncation and special tokens.
+Afterwards we need to add special tokens manually at the beginning and end, manually pad the chunks to 512 if needed and then stack the tensors.
 
 
 ## Installation
@@ -88,6 +102,8 @@ pip install -r requirements.txt
 ## Usage
 <a name="usage"></a>
 
-Run the script:
+Run the script within the virtualenv:
 
 ```bash
+python inference_pipeline.py --url http://www.example.com
+```
