@@ -1,4 +1,4 @@
-# Exadel Podix ML task
+# BERT ML task
 
 ## Table of Contents
 1. [Framing the Problem](#framing-the-problem)
